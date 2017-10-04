@@ -4,31 +4,41 @@ from Server.Objects.Evento import Evento
 
 class Inventario(Entity):
 
-    def __init__(self, identifier, upper_object):
-        super().__init__(identifier, upper_object)
+    def __init__(self, identifier):
+        super().__init__(identifier)
 
-    def coger(self, user, command, evento, get_evento=False):
+    def coger(self, user, command, evento, get_evento=False):  # TODO Sistema de pesos
+        """
+        Recoge un objeto de la sala
+        """
         if get_evento:
             if len(command) == 0:
                 return "INVALID_SINTAX"
             target = user.sala.query_entity(user.translate(command[0]))
             if target:
+                if not target.get_atribute("pickable"):
+                    return "NOT_PICKABLE"
+                if target.identifier in self.entities:
+                    return "ALREADY_PICKED"
                 return Evento("pick_object", user, {"target": target})
             return "ENTITY_NOT_FOUND"
 
-        if type(evento) != evento:
+        if type(evento) != Evento:
             user.send(evento)
         else:
-            self.add_entity(evento.get_atribute("target"))
-            user.sala.
+            target = evento.get_atribute("target")
+            self.add_entity(target, set_upper=False)
+            if not target.get_atribute("infinite"):
+                target.get_upper_object().remove_entity(target)
+            target.set_upper_object(self)
 
     def parse_command(self, user, command):
-        commands = {}
+        commands = {"pick": self.coger}
 
         if command[0] not in commands:
             return False
         evento = user.sala.orden(commands[command[0]](user, command[1:], None, get_evento=True))
-        if not evento.permited:
+        if type(evento) == Evento and not evento.permited:
             user.send(evento.not_permited_txt)
         else:
             commands[command[0]](user, command[1:], evento)

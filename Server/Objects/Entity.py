@@ -58,12 +58,18 @@ class Entity:
                 return query
         return None
 
-    def add_entity(self, entity):
+    def add_entity(self, entity, force=False, set_upper=True):
         """
         Añade una sub-entidad
         :param entity: Entidad a añadir
+        :param force: Forzar la sobrescritura?
         """
-        self.entities[entity.identifier] = entity
+        if entity.identifier not in self.entities or force:
+            if set_upper:
+                entity.set_upper_object(self)
+            self.entities[entity.identifier] = entity
+        else:
+            raise KeyError("Se ha intentado sobreescribir una entidad")
 
     def remove_entity(self, entity):
         """
@@ -71,6 +77,12 @@ class Entity:
         :param entity: Entidad a destruir
         """
         del self.entities[entity.identifier]
+
+    def get_upper_object(self):
+        return self.upper_object
+
+    def set_upper_object(self, entity):
+        self.upper_object = entity
 
     def parse_command(self, user, command):
         pass
@@ -81,9 +93,11 @@ class Entity:
         :param user: Objeto personaje que a enviado el comando
         :param command: Comando a ejecutar
         """
+        if self.parse_command(user, command):
+            return True
         values = list(self.entities.values())
         for x in values:
-            if x.exec_values(user, command):
+            if x.exec_command(user, command):
                 return True
         return False
 
@@ -103,5 +117,8 @@ class Entity:
         :param token: Atributo a escribir
         :param value: Valor del atributo
         """
+        self.atributes[token] = value
+
+    def remove_atribute(self, token):
         if token in self.atributes:
-            self.atributes[token] = value
+            del self.atributes[token]

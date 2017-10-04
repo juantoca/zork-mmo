@@ -5,17 +5,16 @@ de objetos para que modifiquen la accion y, finalmente, llaman a la funcion run 
 accion
 """
 from Server.Objects.Evento import Evento
+from Server.Objects.Entity import Entity
 
 
-class Sala:
+class Sala(Entity):
 
     def __init__(self, identifier, coordenadas, conexiones):
-
-        self.identifier = identifier
+        super().__init__(identifier)
         self.coordenadas = coordenadas
         self.conexiones = conexiones  # {direccion: coordenadas}
         self.usuarios = {}
-        self.entidades = {}
         self.description = None
 
     def orden(self, evento):
@@ -23,7 +22,7 @@ class Sala:
             return evento
         for x in self.usuarios.values():
             x.evento(evento)
-        for x in self.entidades.values():
+        for x in self.entities.values():
             x.evento(evento)
         return evento
 
@@ -32,16 +31,6 @@ class Sala:
 
     def remove_user(self, user):
         del self.usuarios[user.nick]
-
-    def prepare_save(self):
-        entidades = list(self.entidades.values())
-        for x in entidades:
-            x.prepare_save()
-
-    def update(self):
-        entidades = list(self.entidades.values())
-        for x in entidades:
-            x.update()
 
     def save(self):
         self.prepare_save()
@@ -58,22 +47,17 @@ class Sala:
         return returneo
 
     def query_entity(self, identifier):
-        returneo = None
-        if identifier in self.entidades:
-            return self.entidades[identifier]
+        if identifier in self.entities:
+            return self.entities[identifier]
         for x in self.usuarios.values():
             query = x.query_entity(identifier)
             if query is not None:
                 return query
-        for x in self.entidades.values():
+        for x in self.entities.values():
             returneo = x.query_entity(identifier)
-        return returneo
-
-    def add_entity(self, entity, force=False):
-        if entity.identifier not in self.entidades or force:
-            self.entidades[entity.identifier] = entity
-        else:
-            raise KeyError("Se ha intentado sobreescribir una entidad")
+            if returneo:
+                return returneo
+        return None
 
     def get_users(self):
         jugadores = []
@@ -82,15 +66,12 @@ class Sala:
         return jugadores
 
     def get_entities(self):  # TODO Entidades ocultas
-        return list(self.entidades.keys())
-
-    def parse_command(self, user, command):  # TODO Comandos de la sala
-        pass
+        return list(self.entities.keys())
 
     def exec_command(self, user, command):
         if self.parse_command(user, command):
             return True
-        for x in self.entidades.values():
+        for x in self.entities.values():
             if x.exec_command(user, command):
                 return True
         for x in self.usuarios.values():

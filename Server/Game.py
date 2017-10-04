@@ -19,7 +19,7 @@ class Game:
         self.languages = Languages()
         self.queue = m.Queue()
         self.salas = {}  # coordenadas: Sala
-        self.users = {}  # nick : personaje
+        self.users = {}  # nick : Personaje
         self.last_refresh = time()
         self.last_save = time()
         self.refresh_rate = refresh_rate
@@ -44,7 +44,7 @@ class Game:
         if time() - self.last_save > self.save_rate:
             info("Volcando datos a disco")
             for x in self.users.values():
-                x[1].send(self, x[0], "SAVING_DATA")
+                x[1].send(self, x, "SAVING_DATA")
             self.save_all()
             self.last_save = time()
 
@@ -110,6 +110,8 @@ class Game:
         :param objeto: Objeto de personaje
         """
         coords = objeto.coords
+        if objeto.nick in self.users:
+            self.users[objeto.nick].save()
         if coords not in self.salas:
             sala = get_sala_object(objeto.coords)
             if sala is None:

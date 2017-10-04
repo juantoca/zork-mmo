@@ -15,7 +15,7 @@ class Personaje(Entity):
         self.sala = None
         self.game = None
         self.conn = None
-        self.add_entity(Inventario("INVENTORY", self))
+        self.add_entity(Inventario("INVENTORY"))
 
     def save(self):
         """
@@ -84,4 +84,6 @@ class Personaje(Entity):
         command = command.split(" ")
         command[0] = self.translate(command[0])
         if not parse(self, command):
-            self.sala.exec_command(self, command)
+            handled = self.sala.exec_command(self, command)
+            if not handled:
+                self.send("INVALID_COMMAND")

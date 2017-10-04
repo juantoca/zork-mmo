@@ -6,6 +6,7 @@ idioma =set_language
 ir =move_to
 contraseña =passwd_change
 observar =get_entities
+coger =pick
 
 command_list =descripcion <ENTIDAD>: Obtiene la descripcion de ENTIDAD. En caso de no especificar ninguna, se obtendrá la descripción de la sala.
 idioma <IDIOMA>: Cambia la configuración de idioma. En caso de omisión, devuelve la lista de lenguajes soportados.
@@ -51,6 +52,8 @@ UNKNOWN_LANGUAGE =El lenguaje seleccionado no existe
 INVALID_COMMAND =El comando introducido no ha sido reconocido
 INVALID_DIRECTION =¿No te dije que por ahí no hay salida? Puede que no hayas preguntado...
 INVALID_SINTAX =La sintaxis del comando no es correcta. Usa el comando "ayuda" para revisar el uso del comando
+NOT_PICKABLE =No tiene pinta que se pueda coger
+ALREADY_PICKED =Pa que quieres coger eso jaja salu2
 
 # IDENTIFIERS
 

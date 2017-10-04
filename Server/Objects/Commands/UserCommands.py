@@ -9,7 +9,7 @@ def parse(user, command):
     if command[0] not in commands:
         return False
     evento = user.sala.orden(commands[command[0]](user, command[1:], None, get_evento=True))
-    if not evento.permited:
+    if type(evento) == Evento and not evento.permited:
         user.send(evento.not_permited_txt)
     else:
         commands[command[0]](user, command[1:], evento)
@@ -33,7 +33,7 @@ def get_descripcion(user, command, evento, get_evento=False):
     target = evento.get_atribute("target")
     if hasattr(target, "get_description"):
         user.send(target.get_description())
-        user.send("ENTITY_LIST", formato=(user.lista(user.sala.get_entities()),))
+        user.send("ENTITY_LIST", formato=(user.lista(user.sala.get_entities(), void="ANY_FEM"),))
     else:
         user.send("NO_DESCRIPTION")
 
