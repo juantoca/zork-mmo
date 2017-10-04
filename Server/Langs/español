@@ -1,0 +1,57 @@
+# COMANDOS
+
+descripcion =get_description
+ayuda =get_commands
+idioma =set_language
+ir =move_to
+contraseña =passwd_change
+observar =get_entities
+
+command_list =descripcion <ENTIDAD>: Obtiene la descripcion de ENTIDAD. En caso de no especificar ninguna, se obtendrá la descripción de la sala.
+idioma <IDIOMA>: Cambia la configuración de idioma. En caso de omisión, devuelve la lista de lenguajes soportados.
+ir <DIRECCION>: Mueve el jugador en la dirección indicada. En caso de omisión, devuelve la lista de direcciones válidas.
+ayuda: Muestra esta ayuda.
+contraseña <ACTUAL> <NUEVA>: Cambia la contraseña de la cuenta.
+
+# DATA
+
+norte =NORTH
+sur =SOUTH
+este =EAST
+oeste =WEST
+
+WEST =Oeste
+EAST =Este
+NORTH =Norte
+SOUTH =Sur
+
+# CONJUNCIONES
+
+AND =y
+
+# DESCRIPCIONES
+
+=
+DIRECCIONES =Las posibles direcciones son: {0}
+ENTITY_LIST =Puedes ver las siguientes entidades: {0}
+AVAILABLE_LANGUAGES =Los idiomas disponibles son los siguientes: {0}
+NOTHING =nada
+ANY_MASC =ninguno
+ANY_FEM =ninguna
+
+# AVISOS
+
+SAVING_DATA =El servidor esta guardando los datos. Es probable que produzca lag
+
+# ERRORES
+
+ENTITY_NOT_FOUND =La entidad seleccionada no existe o esta oculta
+NO_DESCRIPTION =Absolutamente indescriptible
+UNKNOWN_LANGUAGE =El lenguaje seleccionado no existe
+INVALID_COMMAND =El comando introducido no ha sido reconocido
+INVALID_DIRECTION =¿No te dije que por ahí no hay salida? Puede que no hayas preguntado...
+INVALID_SINTAX =La sintaxis del comando no es correcta. Usa el comando "ayuda" para revisar el uso del comando
+
+# IDENTIFIERS
+
+jorl =jorl
