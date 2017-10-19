@@ -49,12 +49,22 @@ class Game:
             self.last_save = time()
 
     def get_sala(self, coords):
+        """
+        Devuelve la sala en las coordenadas dadas
+        :param coords: Coordenadas a obtener
+        :return: Sala en las coordenadas dadas
+        """
         if coords in self.salas:
             return self.salas[coords]
         else:
             return get_sala_object(coords)
 
     def move_user(self, user, coords):
+        """
+        Mueve un usuario a las coordenadas dadas
+        :param user: Usuario a mover
+        :param coords: Coordenadas de destino
+        """
         sala = self.get_sala(coords)
         sala.add_user(user)
         self.salas[sala.coordenadas] = sala

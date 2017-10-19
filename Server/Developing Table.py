@@ -8,8 +8,10 @@ sala = Sala("Spawn", (0, 0, 0), {"NORTH": (0, 1, 0)})
 sala1 = Sala("Prueba", (0, 1, 0), {"SOUTH": (0, 0, 0)})
 sala.description = "ESTO ES EL SPAWN"
 sala1.description = "ESTO ES LA PRUEBA"
-entidad = Jorl("jorl", sala)
+entidad = Jorl("jorl", "jorl", "JORL")
+entidad2 = Jorl("cucu", "jorl", "CUCU")
 entidad.set_atribute("pickable", True)
 sala.add_entity(entidad)
+sala.add_entity(entidad2)
 create_sala_entry(sala)
 create_sala_entry(sala1)

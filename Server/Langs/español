@@ -5,14 +5,20 @@ ayuda =get_commands
 idioma =set_language
 ir =move_to
 contraseña =passwd_change
-observar =get_entities
 coger =pick
+soltar = drop
+inventario = query_inventory
+i = query_inventory
 
 command_list =descripcion <ENTIDAD>: Obtiene la descripcion de ENTIDAD. En caso de no especificar ninguna, se obtendrá la descripción de la sala.
 idioma <IDIOMA>: Cambia la configuración de idioma. En caso de omisión, devuelve la lista de lenguajes soportados.
 ir <DIRECCION>: Mueve el jugador en la dirección indicada. En caso de omisión, devuelve la lista de direcciones válidas.
 ayuda: Muestra esta ayuda.
 contraseña <ACTUAL> <NUEVA>: Cambia la contraseña de la cuenta.
+coger <ENTIDAD>: Coge la ENTIDAD seleccionada
+soltar <ENTIDAD>: Suelta la ENTIDAD seleccionada
+inventario: Devuelve la lista de objetos en el inventario
+i: Shortcut para "inventario"
 
 # DATA
 
@@ -33,27 +39,33 @@ AND =y
 # DESCRIPCIONES
 
 =
-DIRECCIONES =Las posibles direcciones son: {0}
-ENTITY_LIST =Puedes ver las siguientes entidades: {0}
-AVAILABLE_LANGUAGES =Los idiomas disponibles son los siguientes: {0}
-NOTHING =nada
-ANY_MASC =ninguno
-ANY_FEM =ninguna
+DIRECTIONS = Las posibles direcciones son: {0}
+ENTITY_LIST = Puedes ver las siguientes entidades: {0}
+AVAILABLE_LANGUAGES = Los idiomas disponibles son los siguientes: {0}
+INVENTORY_CONTENTS = Tienes los siguientes objetos en el inventario: {0}
+
+NOTHING = nada
+ANY_MASC = ninguno
+ANY_FEM = ninguna
 
 # AVISOS
 
-SAVING_DATA =El servidor esta guardando los datos. Es probable que produzca lag
+SAVING_DATA = El servidor esta guardando los datos. Es probable que produzca lag
 
 # ERRORES
 
-ENTITY_NOT_FOUND =La entidad seleccionada no existe o esta oculta
-NO_DESCRIPTION =Absolutamente indescriptible
-UNKNOWN_LANGUAGE =El lenguaje seleccionado no existe
-INVALID_COMMAND =El comando introducido no ha sido reconocido
-INVALID_DIRECTION =¿No te dije que por ahí no hay salida? Puede que no hayas preguntado...
-INVALID_SINTAX =La sintaxis del comando no es correcta. Usa el comando "ayuda" para revisar el uso del comando
-NOT_PICKABLE =No tiene pinta que se pueda coger
-ALREADY_PICKED =Pa que quieres coger eso jaja salu2
+ENTITY_NOT_FOUND = La entidad seleccionada no existe o esta oculta
+NO_DESCRIPTION = Absolutamente indescriptible
+UNKNOWN_LANGUAGE = El lenguaje seleccionado no existe
+INVALID_COMMAND = El comando introducido no ha sido reconocido
+INVALID_DIRECTION = ¿No te dije que por ahí no hay salida? Puede que no hayas preguntado...
+INVALID_SINTAX = La sintaxis del comando no es correcta. Usa el comando "ayuda" para revisar el uso del comando
+NOT_PICKABLE = No tiene pinta que se pueda coger
+ENTITY_TYPE_NOT_FOUND = No hay ningún objeto así
+TOO_MANY_ENTITIES = Se han encontrado multiples entidades del mismo tipo, elija una de las entidades:
+FORBIDDEN_INDEX = El número seleccionado es demasiado grande
+NOT_DROPABLE = No tiene pinta de que te puedas deshacer de eso
+ENTITY_NOT_IN_INVENTORY = No parece que tengas eso en el inventario
 
 # IDENTIFIERS
 

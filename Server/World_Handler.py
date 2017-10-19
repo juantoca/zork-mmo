@@ -6,7 +6,8 @@ db = SqliteDatabase("Salas.db")
 
 
 class Sala(Model):
-    x = FloatField(primary_key=False)  # Uso floats porque es posible que para organizar las salas en zonas vengan bien los decimales
+    x = FloatField(primary_key=False)  # Uso floats porque es posible que para organizar
+    # las salas en zonas vengan bien los decimales
     y = FloatField(primary_key=False)
     z = FloatField(primary_key=False)
     nombre = CharField()
@@ -15,11 +16,17 @@ class Sala(Model):
     class Meta:
         database = db
 
+
 if db.get_tables() == []:
     db.create_table(Sala)
 
 
 def get_sala_object(coords):
+    """
+    Obtiene la sala de las coordenadas dadas
+    :param coords: Coordenadas de la sala
+    :return: Objeto Sala
+    """
     try:
         return cargar(Sala.select().where((Sala.x == coords[0]) & (Sala.y == coords[1]) & (Sala.z == coords[2])).get().
                       objeto)
@@ -29,6 +36,12 @@ def get_sala_object(coords):
 
 
 def set_sala_object(coords, objeto):
+    """
+    Sobreescribe una sala en la base de datos
+    :param coords: Coordenadas de la sala
+    :param objeto: Objeto sala
+    :return: True si existe la sala, False si no
+    """
     try:
         obj = Sala.select().where((Sala.x == coords[0]) & (Sala.y == coords[1]) & (Sala.z == coords[2])).get()
         obj.objeto = guardar(objeto)
@@ -39,6 +52,10 @@ def set_sala_object(coords, objeto):
 
 
 def create_sala_entry(objeto):
+    """
+    Crea una entrada para una nueva sala
+    :param objeto: Objeto sala a guardar
+    """
     coords = objeto.coordenadas
     name = objeto.identifier
     sala = get_sala_object(coords)

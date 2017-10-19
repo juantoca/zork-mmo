@@ -6,7 +6,7 @@ from Server.Objects.Subclases.UserEntities.Inventario import Inventario
 class Personaje(Entity):
 
     def __init__(self, nick, initial_coords, bio=""):
-        super().__init__(nick)
+        super().__init__(nick, "USER")
         self.nick = nick
         self.coords = initial_coords
         self.desc = bio
@@ -55,12 +55,13 @@ class Personaje(Entity):
             forma.append(self.translate(x))
         self.conn.send(self.translate(token).format(*forma))
 
-    def lista(self, raw_lista: list, void: str = "ANY_MASC") -> str:
+    def lista(self, raw_lista: list, void: str = "ANY_MASC", natural_language=True) -> str:
         """
         Devuelve una string que forma una enumeración de elementos (elemento1, elemento2 y elemento3) de una lista
         sin traducir
         :param raw_lista: Lista de tokens
         :param void: Token que usar cuando la lista esta vacía
+        :param natural_language: Debo enumerar con comas e "y"s o como listas de la compra?
         :return: String lista para enviar
         """
         translated_lista = []
@@ -69,21 +70,63 @@ class Personaje(Entity):
         long = len(translated_lista)
         if long == 0:
             return "·" + self.translate(void)
-        elif long == 1:
-            return "·" + self.translate(translated_lista[0])
         returneo = "·"
-        for x in translated_lista[:-2]:
-            returneo += x + ", "
-        returneo += translated_lista[-2] + " " + self.translate("AND") + " " + translated_lista[-1]
+        if natural_language:
+            if long == 1:
+                return "·" + translated_lista[0]
+            for x in translated_lista[:-2]:
+                returneo += x + ", "
+            returneo += translated_lista[-2] + " " + self.translate("AND") + " " + translated_lista[-1]
+        else:
+            for x in translated_lista:
+                returneo += "\n- " + x
         return returneo
 
     def get_description(self):
         return self.desc
 
-    def handle_command(self, command):
+    def handle_command(self, command):  # TODO eliminar strings vacias
+        """
+        Protocolo de ejecución de un comando
+        :param command: Comando a parsear
+        """
         command = command.split(" ")
+        try:
+            command.remove("")
+        except ValueError:
+            pass
         command[0] = self.translate(command[0])
         if not parse(self, command):
             handled = self.sala.exec_command(self, command)
             if not handled:
                 self.send("INVALID_COMMAND")
+
+    def target(self, type_identifier, ind=0, source=None):
+        """
+        Protocolo de seleccion de entidades objetivo
+        :param type_identifier: Tipo de entidad a buscar
+        :param ind: Numero de entidad a seleccionar
+        :param source: Objeto en el que buscar
+        :return: String si no se ha seleccionado una entidad o Entidad si se ha seleccionado
+        """
+        if type(ind) != int:
+            return "FORBIDDEN_INDEX"
+        if source is None:
+            source = self.sala
+        possibilities = source.search_type(type_identifier)
+        if len(possibilities) == 0:
+            return "ENTITY_NOT_FOUND"
+        elif len(possibilities) == 1:
+            return possibilities[0]
+        else:
+            if not ind:
+                returneo = "·" + self.translate("TOO_MANY_ENTITIES")
+                for x in range(0, len(possibilities)):
+                    entity = possibilities[x]
+                    returneo += "\n" + str(x+1) + ". " + self.translate(entity.identifier)
+                return returneo
+            else:
+                if ind > len(possibilities):
+                    return "FORBIDDEN_INDEX"
+                else:
+                    return possibilities[ind-1]

@@ -2,9 +2,10 @@
 
 class Entity:
 
-    def __init__(self, identifier, upper_object=None):
+    def __init__(self, identifier, identity_type, upper_object=None):
         self.identifier = identifier
-        self.entities = {}
+        self.identity_type = identity_type
+        self.entities = []
         """Todas las entidades pueden contener otras entidades de tal forma que se puede modificar el comportamiento
         de una entidad simplemente añadiendo sub-entidades. Por ejemplo, un cofre se podrá abrir de normal y sin
         necesidad de redefinir cofre en el caso de querer añadirle un cerrojo podemos añadirle una sub entidad 
@@ -16,67 +17,65 @@ class Entity:
         gran escalabilidad en el proyecto"""
         self.atributes = {}
 
+    def search_type(self, type_identifier):
+        returneo = []
+        if self.identity_type == type_identifier:
+            returneo.append(self)
+        for x in self:
+            returneo += x.search_type(type_identifier)
+        return returneo
+
     def evento(self, event_object):
         """
         Método que modifica un objeto de tipo Evento para su posterior ejecución
         :param event_object: Objeto Evento
         """
-        entidades = list(self.entities.values())
-        for x in entidades:
+        for x in self:
             x.evento(event_object)
 
     def update(self):
         """
         Método que se ejecuta en las entidades a cada ciclo de juego
         """
-        entidades = list(self.entities.values())
-        for x in entidades:
+        for x in self:
             x.update()
 
     def prepare_save(self):
         """
-        Método que prepara las entidades para ser guardadas en disco
+        Método que prepara las entidades para ser guardadas en disco recursivamente
         """
-        entidades = list(self.entities.values())
-        for x in entidades:
+        for x in self:
             x.prepare_save()
 
     def query_entity(self, identifier):
         """
         Busca una entidad recursivamente
         :param identifier: Identificador de la entidad
-        :return: None si no se ha encontrado ninguna sub-entidad. Object si se ha encontrado
+        :return: Lista de entidades que responden al identifier
         """
-        if identifier in self.entities:
-            return self.entities[identifier]
-        if len(self.entities) == 0:
-            return None
-        values = list(self.entities.values())
-        for x in values:
-            query = x.query_entity(identifier)
-            if query is not None:
-                return query
-        return None
+        returneo = []
+        if identifier == self.identifier:
+            returneo.append(self)
+        for x in self:
+            returneo += x.query_entity(identifier)
+        return returneo
 
-    def add_entity(self, entity, force=False, set_upper=True):
+    def add_entity(self, entity, set_upper=True):
         """
         Añade una sub-entidad
         :param entity: Entidad a añadir
-        :param force: Forzar la sobrescritura?
+        :param set_upper: Debo guardar la clase que la contiene?
         """
-        if entity.identifier not in self.entities or force:
-            if set_upper:
-                entity.set_upper_object(self)
-            self.entities[entity.identifier] = entity
-        else:
-            raise KeyError("Se ha intentado sobreescribir una entidad")
+        if set_upper:
+            entity.set_upper_object(self)
+        self.entities.append(entity)
 
     def remove_entity(self, entity):
         """
         Destruye una sub-entidad
         :param entity: Entidad a destruir
         """
-        del self.entities[entity.identifier]
+        self.entities.remove(entity)
 
     def get_upper_object(self):
         return self.upper_object
@@ -95,8 +94,7 @@ class Entity:
         """
         if self.parse_command(user, command):
             return True
-        values = list(self.entities.values())
-        for x in values:
+        for x in self:
             if x.exec_command(user, command):
                 return True
         return False
@@ -122,3 +120,11 @@ class Entity:
     def remove_atribute(self, token):
         if token in self.atributes:
             del self.atributes[token]
+
+    def __iter__(self):
+        """
+        Itera a través de todas las entidades
+        :return: Entidad actual
+        """
+        for x in self.entities:
+            yield x

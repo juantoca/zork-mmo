@@ -26,6 +26,14 @@ class Usuario(Model):
 
 
 def handle_login(conn: socket, game: Game, server: Server, timeout=10, connection_cooldown=0.1):  # TODO Baja el timeout
+    """
+    Maneja una conexión entrante
+    :param conn: Conexión
+    :param game: Game object
+    :param server: Server object
+    :param timeout: Tiempo de espera del comando de registro antes de cerrar conexión
+    :param connection_cooldown: Tiempo entre peticiones que puede mandar un cliente
+    """
     try:
         conn = server.key_exchange(conn, timeout)
         conn.set_query_cooldown(connection_cooldown)
@@ -70,6 +78,12 @@ def parse_string(string: str, forbidden_chars: tuple = (" ", ";", "-", "·")) ->
 
 def nick_validation(nick: str, nick_parser: callable=parse_string) -> bool:
     # TODO Ensure nicks don't collide with entities
+    """
+    Comprueba que el nick es válido
+    :param nick: Nick a validar
+    :param nick_parser: String parser
+    :return: Valid nick?
+    """
     if len(nick) > 20 or not nick_parser(nick):
         return False
     return True
@@ -137,6 +151,14 @@ def login(conn: Connection, game: Game, command: (list, tuple), nick_parser: cal
 
 
 def change_passwd(user, current: str, new: str, game, conn):
+    """
+    Cambia la contraseña de el usuario especificado
+    :param user: Usuario a modificar
+    :param current: Contraseña actual
+    :param new: Nueva contraseña
+    :param game: Game object
+    :param conn: Conexion con el usuario
+    """
     registro = Usuario.select().where(Usuario.nick == user.nick).get()
     hasheo = SHA3_256.new(bytes(current, "utf-8")).hexdigest()
     if hasheo != registro.password_hash:
@@ -146,14 +168,25 @@ def change_passwd(user, current: str, new: str, game, conn):
         registro.save()
 
 
-def get_user_object(nick: str):
+def get_user_object(nick: str) -> Personaje:
+    """
+    Carga un usuario de la base de datos
+    :param nick: Nick a buscar
+    :return: Objeto personaje o None si no existe el usuario especificado
+    """
     try:
         return cargar(Usuario.select().where(Usuario.nick == nick).get().objeto)
     except Usuario.DoesNotExist:
         return None
 
 
-def set_user_object(nick: str, objeto: Personaje):
+def set_user_object(nick: str, objeto: Personaje) -> bool:
+    """
+    Vuelca un usuario a la base de datos
+    :param nick: Nick del usuario
+    :param objeto: Objeto usuario
+    :return: Success?
+    """
     try:
         obj = Usuario.select().where(Usuario.nick == nick).get()
         obj.objeto = guardar(objeto)

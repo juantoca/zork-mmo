@@ -41,10 +41,10 @@ class Archivo:
                     continue
                 if "=" in linea:
                     tmp = linea.split("=")
-                    working = tmp[0].split(" ")[0]
+                    working = tmp[0].strip(" ")
                     if working in self.data:
                         raise ValueError("Corrupted file. Key " + working + " repeated")
-                    self.data[working] = tmp[1].split("\n")[0]
+                    self.data[working] = tmp[1].split("\n")[0].strip(" ")
                 else:
                     self.data[working] += "\n" + linea.split("\n")[0]
 
