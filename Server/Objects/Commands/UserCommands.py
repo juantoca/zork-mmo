@@ -95,6 +95,9 @@ def set_language(user, command, evento, get_evento=False):
 
 
 def abrir(user, command, evento, get_evento=False):
+    """
+    Abre un contenedor
+    """
     if get_evento:
         if len(command) == 0:
             return "INVALID_SINTAX"
