@@ -8,6 +8,22 @@ from Server.Objects.Evento import Evento
 from Server.Objects.Entity import Entity
 
 
+def descripcion(sala, evento):
+    desc = "·"
+    tmp = sala.get_atribute("description")
+    if tmp:
+        desc += evento.source.translate(tmp)
+    desc += "\n"+evento.source.translate("ENTITY_LIST")\
+        .format(evento.source.lista([x.identifier for x in sala.get_entities()], literal=False))
+    evento.set_atribute("description", desc)
+
+
+def event_handler(sala, evento):
+    funciones = {"get_description": descripcion}
+    if evento.identifier in funciones:
+        funciones[evento.identifier](sala, evento)
+
+
 class Sala(Entity):
 
     def __init__(self, identifier, coordenadas, conexiones):
@@ -25,6 +41,8 @@ class Sala(Entity):
         """
         if type(evento) != Evento:
             return evento
+        if evento.get_atribute("target") == self:
+            event_handler(self, evento)
         for x in self.usuarios.values():
             x.evento(evento)
         for x in self:
@@ -97,9 +115,6 @@ class Sala(Entity):
         for x in self.usuarios.keys():
             jugadores.append("·"+x)
         return jugadores
-
-    def get_entities(self):  # TODO Entidades ocultas
-        return self.entities
 
     def exec_command(self, user, command):
         """

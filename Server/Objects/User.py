@@ -5,11 +5,10 @@ from Server.Objects.Subclases.UserEntities.Inventario import Inventario
 
 class Personaje(Entity):
 
-    def __init__(self, nick, initial_coords, bio=""):
+    def __init__(self, nick, initial_coords):
         super().__init__(nick, "USER")
         self.nick = nick
         self.coords = initial_coords
-        self.desc = bio
         self.cache = {}  # Zona donde las entidades pueden almacenar informacion(progreso de misión, etc...)
         self.language = "español"
         self.sala = None
@@ -55,25 +54,30 @@ class Personaje(Entity):
             forma.append(self.translate(x))
         self.conn.send(self.translate(token).format(*forma))
 
-    def lista(self, raw_lista: list, void: str = "ANY_MASC", natural_language=True) -> str:
+    def lista(self, raw_lista: list, void: str = "ANY_MASC", natural_language=True
+              , literal=True) -> str:
         """
         Devuelve una string que forma una enumeración de elementos (elemento1, elemento2 y elemento3) de una lista
         sin traducir
         :param raw_lista: Lista de tokens
         :param void: Token que usar cuando la lista esta vacía
         :param natural_language: Debo enumerar con comas e "y"s o como listas de la compra?
+        :param literal: Debo devolverlo con un "·" delante para que las funciones de traducción lo tomen como literal?
         :return: String lista para enviar
         """
+        initial = ""
+        if literal:
+            initial = "·"
         translated_lista = []
         for x in raw_lista:
             translated_lista.append(self.translate(x))
         long = len(translated_lista)
         if long == 0:
-            return "·" + self.translate(void)
-        returneo = "·"
+            return initial + self.translate(void)
+        returneo = initial
         if natural_language:
             if long == 1:
-                return "·" + translated_lista[0]
+                return initial + translated_lista[0]
             for x in translated_lista[:-2]:
                 returneo += x + ", "
             returneo += translated_lista[-2] + " " + self.translate("AND") + " " + translated_lista[-1]
@@ -81,9 +85,6 @@ class Personaje(Entity):
             for x in translated_lista:
                 returneo += "\n- " + x
         return returneo
-
-    def get_description(self):
-        return self.desc
 
     def handle_command(self, command):  # TODO eliminar strings vacias
         """
@@ -109,7 +110,9 @@ class Personaje(Entity):
         :param source: Objeto en el que buscar
         :return: String si no se ha seleccionado una entidad o Entidad si se ha seleccionado
         """
-        if type(ind) != int:
+        try:
+            ind = int(ind)
+        except:
             return "FORBIDDEN_INDEX"
         if source is None:
             source = self.sala

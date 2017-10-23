@@ -9,6 +9,9 @@ coger =pick
 soltar = drop
 inventario = query_inventory
 i = query_inventory
+abrir = open
+cerrar = close
+meter = insert_in_container
 
 command_list =descripcion <ENTIDAD>: Obtiene la descripcion de ENTIDAD. En caso de no especificar ninguna, se obtendrá la descripción de la sala.
 idioma <IDIOMA>: Cambia la configuración de idioma. En caso de omisión, devuelve la lista de lenguajes soportados.
@@ -44,6 +47,10 @@ ENTITY_LIST = Puedes ver las siguientes entidades: {0}
 AVAILABLE_LANGUAGES = Los idiomas disponibles son los siguientes: {0}
 INVENTORY_CONTENTS = Tienes los siguientes objetos en el inventario: {0}
 
+CONTAINER_CLOSED = Esta cerrado
+CONTAINER_OPEN = Esta abierto
+CONTAINS = Contiene: {0}
+
 NOTHING = nada
 ANY_MASC = ninguno
 ANY_FEM = ninguna
@@ -66,6 +73,9 @@ TOO_MANY_ENTITIES = Se han encontrado multiples entidades del mismo tipo, elija 
 FORBIDDEN_INDEX = El número seleccionado es demasiado grande
 NOT_DROPABLE = No tiene pinta de que te puedas deshacer de eso
 ENTITY_NOT_IN_INVENTORY = No parece que tengas eso en el inventario
+ALREADY_OPEN = Ya estaba abierto de par en par
+ALREADY_CLOSED = Esta bastante bien cerrado ya
+CONTAINER_CLOSED_INSERT = No puedes meter nada ahi si esta cerrado
 
 # IDENTIFIERS
 

@@ -7,9 +7,7 @@ class Evento:
         self.source = source
         self.permited = True
         self.not_permited_txt = ""
-        self.atributes = {}
-        for x in atributes.items():
-            self.atributes[x[0]] = x[1]
+        self.atributes = atributes
 
     def get_atribute(self, atribute: str):
         if atribute in self.atributes:
@@ -22,3 +20,7 @@ class Evento:
             self.atributes[atribute] = valor
         else:
             raise KeyError("El atributo modificado no esta contemplado para este evento")
+
+    def forbid(self, message):
+        self.permited = False
+        self.not_permited_txt = message

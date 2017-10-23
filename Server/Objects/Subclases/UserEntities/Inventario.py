@@ -25,8 +25,7 @@ class Inventario(Entity):
 
         target = evento.get_atribute("target")
         self.add_entity(target, set_upper=False)
-        if not target.get_atribute("infinite"):
-            target.get_upper_object().remove_entity(target)
+        target.get_upper_object().remove_entity(target)
         target.set_upper_object(self)
 
     def drop(self, user, command, evento, get_evento=False):

@@ -21,7 +21,7 @@ class Entity:
         returneo = []
         if self.identity_type == type_identifier:
             returneo.append(self)
-        for x in self:
+        for x in self.get_entities():
             returneo += x.search_type(type_identifier)
         return returneo
 
@@ -32,6 +32,9 @@ class Entity:
         """
         for x in self:
             x.evento(event_object)
+
+    def get_entities(self):
+        return [x for x in self.entities if not x.get_atribute("hidden")]
 
     def update(self):
         """
@@ -47,6 +50,19 @@ class Entity:
         for x in self:
             x.prepare_save()
 
+    def has_instance(self, instance):
+        """
+        Devuelve si una entidad esta contenida en esta
+        :param instance: Instancia de la entidad
+        :return: Esta contenida? Boolean
+        """
+        if instance == self:
+            return True
+        for x in self.entities:
+            if x.has_instance(instance):
+                return True
+        return False
+
     def query_entity(self, identifier):
         """
         Busca una entidad recursivamente
@@ -56,7 +72,7 @@ class Entity:
         returneo = []
         if identifier == self.identifier:
             returneo.append(self)
-        for x in self:
+        for x in self.get_entities():
             returneo += x.query_entity(identifier)
         return returneo
 

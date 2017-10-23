@@ -1,17 +1,18 @@
 from Server.Objects.Sala import Sala
-from Server.Objects.Entity import Entity
-
-from Server.Objects.Subclases.Jorl import Jorl
+from Server.Objects.Subclases.Container import Container
 from Server.World_Handler import create_sala_entry
 
-sala = Sala("Spawn", (0, 0, 0), {"NORTH": (0, 1, 0)})
-sala1 = Sala("Prueba", (0, 1, 0), {"SOUTH": (0, 0, 0)})
-sala.description = "ESTO ES EL SPAWN"
-sala1.description = "ESTO ES LA PRUEBA"
-entidad = Jorl("jorl", "jorl", "JORL")
-entidad2 = Jorl("cucu", "jorl", "CUCU")
-entidad.set_atribute("pickable", True)
-sala.add_entity(entidad)
-sala.add_entity(entidad2)
+sala = Sala("Spawn", (0, 0, 0), {})
+sala.set_atribute("description", "ESTO ES EL SPAWN")
+
+jorl = Container("coco", "jorl")
+jorl.set_atribute("pickable", True)
+jorl.set_atribute("description", "Mah little dommy")
+
+contenedor = Container("jorl", "jorl")
+contenedor.set_atribute("description", "ESTO ES UN CONTENEDOR")
+
+sala.add_entity(contenedor)
+sala.add_entity(jorl)
+
 create_sala_entry(sala)
-create_sala_entry(sala1)
