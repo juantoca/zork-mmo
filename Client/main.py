@@ -1,6 +1,7 @@
 import Crypt_Client.Client
 from multiprocessing import Process
 from multiprocessing import Manager
+from time import sleep
 
 
 class Client:
@@ -21,9 +22,10 @@ class Client:
             print(msg)
 
     def speaker(self, salir):
+        #self.conn.send("LOGIN proof 12345678")
         while not salir.value:
             self.conn.send(input(""))
 
 
-cliente = Client("localhost", 8001)
+cliente = Client("localhost", 8000)
 cliente.run()

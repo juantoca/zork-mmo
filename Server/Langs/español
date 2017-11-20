@@ -1,4 +1,4 @@
-# COMANDOS
+# COMANDOS(Modificar primer elemento)
 
 descripcion =get_description
 ayuda =get_commands
@@ -12,6 +12,9 @@ i = query_inventory
 abrir = open
 cerrar = close
 meter = insert_in_container
+decir = say
+
+# Ayuda para los comandos
 
 command_list =descripcion <ENTIDAD>: Obtiene la descripcion de ENTIDAD. En caso de no especificar ninguna, se obtendrá la descripción de la sala.
 idioma <IDIOMA>: Cambia la configuración de idioma. En caso de omisión, devuelve la lista de lenguajes soportados.
@@ -22,6 +25,7 @@ coger <ENTIDAD>: Coge la ENTIDAD seleccionada
 soltar <ENTIDAD>: Suelta la ENTIDAD seleccionada
 inventario: Devuelve la lista de objetos en el inventario
 i: Shortcut para "inventario"
+decir: Dice algo a todo lo que hay en la sala
 
 # DATA
 
@@ -39,16 +43,17 @@ SOUTH =Sur
 
 AND =y
 
-# DESCRIPCIONES
+# DESCRIPTIONS_PROMPTS
 
 =
 DIRECTIONS = Las posibles direcciones son: {0}
 ENTITY_LIST = Puedes ver las siguientes entidades: {0}
 AVAILABLE_LANGUAGES = Los idiomas disponibles son los siguientes: {0}
 INVENTORY_CONTENTS = Tienes los siguientes objetos en el inventario: {0}
+USER_SAID = El usuario {0} dijo: {1}
 
-CONTAINER_CLOSED = Esta cerrado
-CONTAINER_OPEN = Esta abierto
+OPENABLE_CLOSED = Cerrado.
+OPENABLE_OPEN = Abierto.
 CONTAINS = Contiene: {0}
 
 NOTHING = nada
@@ -76,7 +81,19 @@ ENTITY_NOT_IN_INVENTORY = No parece que tengas eso en el inventario
 ALREADY_OPEN = Ya estaba abierto de par en par
 ALREADY_CLOSED = Esta bastante bien cerrado ya
 CONTAINER_CLOSED_INSERT = No puedes meter nada ahi si esta cerrado
+NOT_OPENABLE = No tiene pinta que se pueda abrir o cerrar
+OBSTACLE_IN_THE_WAY = No puedes ir en esa direccion porque esta obstruido por el siguiente obstáculo: {0}
 
-# IDENTIFIERS
+# TYPE_IDENTIFIERS(Modificar primer elemento)
 
-jorl =jorl
+puerta = DOOR
+
+
+# NAME_IDENTIFIERS
+
+gold_door = puerta de oro
+
+# DESCRIPCIONES
+
+gold_door_description = Esto es una puerta de oro.
+spawn_room_description = Esto es el spawn

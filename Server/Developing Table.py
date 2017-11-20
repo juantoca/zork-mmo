@@ -1,18 +1,22 @@
 from Server.Objects.Sala import Sala
+from Server.Objects.Subclases.Door import Door
 from Server.Objects.Subclases.Container import Container
 from Server.World_Handler import create_sala_entry
 
-sala = Sala("Spawn", (0, 0, 0), {})
-sala.set_atribute("description", "ESTO ES EL SPAWN")
+Spawn = Sala("SPAWN", (0, 0, 0), {"NORTH": (1, 0, 0)})
 
-jorl = Container("coco", "jorl")
-jorl.set_atribute("pickable", True)
-jorl.set_atribute("description", "Mah little dommy")
+prueba = Sala("PRUEBA", (1, 0, 0), {"SOUTH": (0, 0, 0)})
 
-contenedor = Container("jorl", "jorl")
-contenedor.set_atribute("description", "ESTO ES UN CONTENEDOR")
+contenedor = Container("COCOPEYE", "jorl")
 
-sala.add_entity(contenedor)
-sala.add_entity(jorl)
+puerta = Door("gold_door", "DOOR", coords=((0, 0, 0), (1, 0, 0)))
+puerta.set_atribute("description", "gold_door_description")
 
-create_sala_entry(sala)
+Spawn.set_atribute("description", "spawn_room_description")
+
+Spawn.add_entity_def(puerta)
+Spawn.add_entity_def(contenedor)
+prueba.add_entity_def(puerta)
+
+create_sala_entry(Spawn)
+create_sala_entry(prueba)

@@ -54,6 +54,15 @@ class Personaje(Entity):
             forma.append(self.translate(x))
         self.conn.send(self.translate(token).format(*forma))
 
+    def get_raw(self, token: str, formato: (tuple, list)=()):
+        """
+        Obtiene el valor de un token con un "·" listo para pasar por pantalla
+        :param token: Token a traducir
+        :param formato: Lista para usar .format()
+        :return: String traducida
+        """
+        return "·"+self.translate(token).format(*[self.translate(x) for x in formato])
+
     def lista(self, raw_lista: list, void: str = "ANY_MASC", natural_language=True
               , literal=True) -> str:
         """
@@ -86,11 +95,13 @@ class Personaje(Entity):
                 returneo += "\n- " + x
         return returneo
 
-    def handle_command(self, command):  # TODO eliminar strings vacias
+    def handle_command(self, command):
         """
         Protocolo de ejecución de un comando
         :param command: Comando a parsear
         """
+        if command == "":
+            return
         command = command.split(" ")
         try:
             command.remove("")

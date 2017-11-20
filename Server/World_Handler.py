@@ -6,6 +6,9 @@ db = SqliteDatabase("Salas.db")
 
 
 class Sala(Model):
+    """
+    Modelo de la tabla Sala
+    """
     x = FloatField(primary_key=False)  # Uso floats porque es posible que para organizar
     # las salas en zonas vengan bien los decimales
     y = FloatField(primary_key=False)
@@ -17,7 +20,7 @@ class Sala(Model):
         database = db
 
 
-if db.get_tables() == []:
+if len(db.get_tables()) == 0:
     db.create_table(Sala)
 
 
@@ -35,7 +38,7 @@ def get_sala_object(coords):
         return None
 
 
-def set_sala_object(coords, objeto):
+def set_sala_object(coords, objeto):  # TODO Encriptar objetos en la base de datos
     """
     Sobreescribe una sala en la base de datos
     :param coords: Coordenadas de la sala
@@ -62,6 +65,4 @@ def create_sala_entry(objeto):
     if sala is None:
         Sala.create(x=coords[0], y=coords[1], z=coords[2], nombre=name, objeto=guardar(objeto))
     else:
-        print(sala.coordenadas)
-        print(coords)
-        raise ValueError("Coords taken")
+        raise ValueError("Coords " + str(coords) + " taken")

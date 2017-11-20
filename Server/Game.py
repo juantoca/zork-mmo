@@ -1,6 +1,6 @@
 import multiprocessing
 from queue import Empty
-from time import time
+from time import time, sleep
 from Server.Config import Languages
 
 from Server.Objects.User import Personaje
@@ -15,6 +15,11 @@ from logging import info, warning, debug
 class Game:
 
     def __init__(self, refresh_rate=60, save_rate=60*60):
+        """
+        Contructor del juego
+        :param refresh_rate: Cada cuanto tengo que refrescar las entidades
+        :param save_rate: Cada cuanto debo hacer un backup?
+        """
         m = multiprocessing.Manager()
         self.languages = Languages()
         self.queue = m.Queue()
@@ -36,12 +41,12 @@ class Game:
             except Empty:
                 empty = True
         self.run_commands()  # Ejecutamos comandos
-        if time() - self.last_refresh > self.refresh_rate:
+        if time() - self.last_refresh > self.refresh_rate:  # Enviamos orden de refresco a las entidades
             debug("Cambio de ciclo")
             for x in self.salas.values():
                 x.update()
             self.last_refresh = time()
-        if time() - self.last_save > self.save_rate:
+        if time() - self.last_save > self.save_rate:  # Volcamos datos a disco
             info("Volcando datos a disco")
             for x in self.users.values():
                 x[1].send(self, x, "SAVING_DATA")
@@ -57,7 +62,12 @@ class Game:
         if coords in self.salas:
             return self.salas[coords]
         else:
-            return get_sala_object(coords)
+            sala = get_sala_object(coords)
+            if sala is None:
+                info("Se ha intentado cargar una sala inexistente en las coordenadas: "+str(coords))
+                return
+            sala.load(self)
+            return sala
 
     def move_user(self, user, coords):
         """
@@ -123,7 +133,7 @@ class Game:
         if objeto.nick in self.users:
             self.users[objeto.nick].save()
         if coords not in self.salas:
-            sala = get_sala_object(objeto.coords)
+            sala = self.get_sala(objeto.coords)
             if sala is None:
                 conn.send("TOKEN SPAWN_POINT_DISSAPEARED")
                 warning("Las coordenadas de inicio del jugador " + objeto.nick + " no contienen ninguna sala")
@@ -142,9 +152,9 @@ class Game:
         Guardamos todos los datos a la base de datos sin descargarlos
         """
         for x in self.users.values():
-            x.save()
+            x.save(self)
         for x in self.salas.values():
-            x.save()
+            x.save(self)
 
     def descargar_sala(self, sala):
         """
@@ -156,7 +166,7 @@ class Game:
 
     def descargar_usuario(self, objeto):
         """
-        Descargamos el usuario dado a la base de datos
+        Descargamos el usuario dado a la base de datos. Si es el único en su sala, la descarga también
         :param objeto: Objeto Personaje
         """
         objeto.save()

@@ -1,7 +1,7 @@
-from Server.Objects.Entity import Entity
+from Server.Objects.Subclases.Openable import Openable
 
 
-class Container(Entity):
+class Container(Openable):
 
     def __init__(self, identifier, identity_type, upper_object=None, closed=True):
         super().__init__(identifier, identity_type, upper_object)
@@ -12,20 +12,9 @@ class Container(Entity):
             return []
         return super().get_entities()
 
-    def evento(self, event_object):
-        super().evento(event_object)
-        self.event_handler(event_object)
-
-    def close(self):
-        self.set_atribute("closed", True)
-
-    def open(self):
-        self.set_atribute("closed", False)
-
     def insert(self, objeto):
         objeto.upper_object.remove_entity(objeto)
         self.add_entity(objeto)
-        print(self.entities)
 
     def extract(self, objeto, source):
         self.remove_entity(objeto)
@@ -46,20 +35,8 @@ class Container(Entity):
                                                 literal=False, void="NOTHING"))
             evento.set_atribute("description", desc)
 
-    def evento_abrir(self, evento):
-        if evento.get_atribute("target") == self:
-            if not self.get_atribute("closed"):
-                evento.forbid("ALREADY_OPEN")
-            evento.set_atribute("callable", self.open)
-
-    def evento_cerrar(self, evento):
-        if evento.get_atribute("target") == self:
-            if self.get_atribute("closed"):
-                evento.forbid("ALREADY_CLOSED")
-            evento.set_atribute("callable", self.close)
-
     def evento_meter(self, evento):
-        if evento.get_atribute("target") == self:
+        if evento.get_atribute("target") == self and evento.get_atribute("objeto") != self:
             if self.get_atribute("closed"):
                 evento.forbid("CONTAINER_CLOSED_INSERT")
             evento.set_atribute("callable", self.insert)

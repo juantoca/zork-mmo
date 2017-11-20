@@ -12,28 +12,35 @@ from peewee import *
 from Server.Game import Game
 from Server.Objects.User import Personaje
 
+from Server.Config import Archivo
+
 db = SqliteDatabase("Users.db")
 
 
 class Usuario(Model):
+    """
+    Modelo para la tabla Usuario
+    """
     nick = CharField(max_length=20, unique=True)
     password_hash = CharField()
     last_connection = IntegerField()
+    ip = CharField(max_length=10)
     objeto = BareField()
 
     class Meta:
         database = db
 
 
-def handle_login(conn: socket, game: Game, server: Server, timeout=10, connection_cooldown=0.1):  # TODO Baja el timeout
+def handle_login(conn: socket, game: Game, server: Server, config: Archivo):
     """
     Maneja una conexión entrante
     :param conn: Conexión
     :param game: Game object
     :param server: Server object
-    :param timeout: Tiempo de espera del comando de registro antes de cerrar conexión
-    :param connection_cooldown: Tiempo entre peticiones que puede mandar un cliente
+    :param config: Configuración del servidor
     """
+    timeout = float(config.get_option("timeout"))
+    connection_cooldown = float(config.get_option("delay"))
     try:
         conn = server.key_exchange(conn, timeout)
         conn.set_query_cooldown(connection_cooldown)
@@ -57,6 +64,11 @@ def handle_login(conn: socket, game: Game, server: Server, timeout=10, connectio
 
 
 def pass_validation(passwd: str) -> bool:
+    """
+    Valida la contraseña
+    :param passwd: Password a validar
+    :return: Es válida?
+    """
     if len(passwd) < 8:
         return False
     return True
@@ -77,7 +89,6 @@ def parse_string(string: str, forbidden_chars: tuple = (" ", ";", "-", "·")) ->
 
 
 def nick_validation(nick: str, nick_parser: callable=parse_string) -> bool:
-    # TODO Ensure nicks don't collide with entities
     """
     Comprueba que el nick es válido
     :param nick: Nick a validar
@@ -90,8 +101,8 @@ def nick_validation(nick: str, nick_parser: callable=parse_string) -> bool:
 
 
 def register(conn: Connection, game: Game, command: (list, tuple), user_object=Personaje,
-             valid_nick_func: callable=nick_validation, valid_passwd_func: callable=pass_validation) -> bool:
-    # TODO Limita los registros
+             valid_nick_func: callable=nick_validation, valid_passwd_func: callable=pass_validation,
+             maximum_accounts_per_ip: int=3) -> bool:
     """
     Protocolo para registrar un usuario
     :param conn: Objeto representando la conexión
@@ -100,6 +111,7 @@ def register(conn: Connection, game: Game, command: (list, tuple), user_object=P
     :param user_object: Objeto que inicializar
     :param valid_nick_func: Funcion con la que verificar la validez del nick
     :param valid_passwd_func: Funcion con la que verificar la validez de la contraseña
+    :param maximum_accounts_per_ip: Número máximo de cuentas por ip
     :return: Succesful?
     """
     command = command[1:]  # [nick, contraseña]
@@ -112,13 +124,19 @@ def register(conn: Connection, game: Game, command: (list, tuple), user_object=P
     if not valid_passwd_func(command[1]):
         conn.send("TOKEN INVALID_PASSWORD")
         return False
+    ip = len(Usuario.select(Usuario.ip == conn.get_conn().getpeername()[0]))
+    if ip >= maximum_accounts_per_ip:
+        conn.send("TOKEN TAKEN_IP")
+        return False
     hasheo = SHA3_256.new(bytes(command[1], "utf-8")).hexdigest()
     usuario = user_object(command[0], initial_coords=(0, 0, 0))
     objeto = guardar(usuario)
-    Usuario.create(nick=command[0], password_hash=hasheo, objeto=objeto, last_connection=int(time()))
+    Usuario.create(nick=command[0], password_hash=hasheo, objeto=objeto,
+                   last_connection=int(time()), ip=conn.get_conn().getpeername()[0])
     game.add_query(conn, usuario)
     sleep(1)  # Este sleep evita que el contador de referencias del objeto socket caiga a cero y se cierre antes
-    #  que el proceso de Game tenga su copia funcional
+    #  que el proceso de Game tenga su copia funcional. Es probable que esto no funcione asi pero funciona asi que
+    # no lo toques
     return True
 
 
@@ -168,7 +186,7 @@ def change_passwd(user, current: str, new: str, game, conn):
         registro.save()
 
 
-def get_user_object(nick: str) -> Personaje:
+def get_user_object(nick: str) -> Personaje:  # TODO Encriptar objetos en la base de datos
     """
     Carga un usuario de la base de datos
     :param nick: Nick a buscar
@@ -195,5 +213,6 @@ def set_user_object(nick: str, objeto: Personaje) -> bool:
     except Usuario.DoesNotExist:
         return False
 
-if db.get_tables() == []:
+
+if len(db.get_tables()) == 0:
     db.create_table(Usuario)

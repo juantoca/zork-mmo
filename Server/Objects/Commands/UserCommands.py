@@ -14,7 +14,8 @@ def parse(user, command):
                 "move_to": mover,
                 "open": abrir,
                 "close": cerrar,
-                "insert_in_container": meter}
+                "insert_in_container": meter,
+                "say": decir}
 
     if command[0] not in commands:
         return False
@@ -37,6 +38,7 @@ def get_descripcion(user, command, evento, get_evento=False):
             return Evento("get_description", user, {"target": user.sala, "description": "NO_DESCRIPTION"})
         if len(command) == 1:
             command.append(0)
+        command[0] = user.translate(command[0])
         target = user.sala.query_user(command[0])
         if not target:
             target = user.target(command[0], command[1])
@@ -103,29 +105,37 @@ def abrir(user, command, evento, get_evento=False):
             return "INVALID_SINTAX"
         if len(command) == 1:
             command.append(0)
+        command[0] = user.translate(command[0])
         target = user.target(command[0], command[1])
         if type(target) == str:
             return target
-        return Evento("open", user, atributes={"target": target, "callable": lambda: None})
+        return Evento("open", user, atributes={"target": target, "callable": lambda: "NOT_OPENABLE"})
 
     evento.get_atribute("callable")()
 
 
 def cerrar(user, command, evento, get_evento=False):
+    """
+    Cierra un contenedor
+    """
     if get_evento:
         if len(command) == 0:
             return "INVALID_SINTAX"
         if len(command) == 1:
             command.append(0)
+        command[0] = user.translate([0])
         target = user.target(command[0], command[1])
         if type(target) == str:
             return target
-        return Evento("close", user, atributes={"target": target, "callable": lambda: None})
+        return Evento("close", user, atributes={"target": target, "callable": lambda: "NOT_OPENABLE"})
 
     evento.get_atribute("callable")()
 
 
 def meter(user, command, evento, get_evento=False):
+    """
+    Mete un objeto en un contenedor
+    """
     if get_evento:
         if len(command) < 2:
             return "INVALID_SINTAX"
@@ -133,9 +143,11 @@ def meter(user, command, evento, get_evento=False):
         if count_target_object(objetos) < 1:
             print(objetos)
             return "INVALID_SINTAX"
+        objetos[0] = user.translate(objetos[0])
         objeto = user.target(objetos[0], objetos[1])
         if type(objeto) == str:
             return objeto
+        objetos[2] = user.translate(objetos[2])
         contenedor = user.target(objetos[2], objetos[3])
         if type(contenedor) == str:
             return contenedor
@@ -150,3 +162,12 @@ def meter(user, command, evento, get_evento=False):
         evento.get_atribute("target").insert(objeto)
     else:
         user.send("ENTITY_NOT_IN_INVENTORY")
+
+
+def decir(user, command, evento, get_evento=False):
+    if get_evento:
+        if len(command) == 0:
+            return "INVALID_SINTAX"
+        return Evento("say", user, atributes={"content": " ".join(command)})
+
+    user.sala.send_all("USER_SAID", formato=("·" + user.nick, "·" + evento.get_atribute("content")))

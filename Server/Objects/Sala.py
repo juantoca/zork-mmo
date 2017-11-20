@@ -31,7 +31,7 @@ class Sala(Entity):
         self.coordenadas = coordenadas
         self.conexiones = conexiones  # {direccion: coordenadas}
         self.usuarios = {}
-        self.description = None
+        self.upper_object = None
 
     def orden(self, evento):
         """
@@ -67,14 +67,14 @@ class Sala(Entity):
         """
         Vuelca la sala a la base de datos
         """
-        self.prepare_save()
         from Server.World_Handler import set_sala_object
         dic_tmp = self.usuarios
         self.usuarios = {}
+        self.prepare_save()
         set_sala_object(self.coordenadas, self)
         self.usuarios = dic_tmp
 
-    def query_user(self, identifier):  # TODO Entidades ocultas
+    def query_user(self, identifier):
         """
         Devuelve el usuario con el nick especificado
         :param identifier: Nick del usuario
@@ -84,7 +84,7 @@ class Sala(Entity):
             return self.usuarios[identifier]
         return returneo
 
-    def query_entity(self, identifier):  # TODO Entidades ocultas
+    def query_entity(self, identifier):
         """
         Devuelve las entidades que responden al identificador especificado
         :param identifier: Identificador de las entidades
@@ -133,9 +133,6 @@ class Sala(Entity):
                 return True
         return False
 
-    def get_description(self):
-        return self.description
-
     def direction_coords(self, direction):
         """
         Obtiene las coordenadas de la dirección especificada
@@ -149,3 +146,17 @@ class Sala(Entity):
 
     def get_directions(self):
         return list(self.conexiones.keys())
+
+    def load(self, game):
+        self.set_game(game)
+
+    def send_all(self, msg, formato=(), excepto=()):
+        """
+        Manda a todos los usuarios un mensaje
+        :param msg: Mensaje a mandar
+        :param formato: .format()
+        :param excepto: lista de nicks a excluir a excluir
+        """
+        for x in self.usuarios.values():
+            if x.nick not in excepto:
+                x.send(msg, formato)

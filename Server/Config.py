@@ -5,6 +5,10 @@ from logging import warning, info
 class Languages:
 
     def __init__(self, root="./Langs/*"):
+        """
+        Carga todos los idiomas en un directorio dado
+        :param root: Directorio donde buscar
+        """
         self.languages = {}
         files = glob.glob(root)
         for x in files:
@@ -13,6 +17,13 @@ class Languages:
             self.languages[idioma] = Archivo(x)
 
     def get_option(self, option, language, advise_non_availability=True):
+        """
+        Obtiene el valor de un token de idioma
+        :param option: Opción a obtener
+        :param language: Lenguaje a consultar
+        :param advise_non_availability: Si no existe el criteio de búsqueda, ¿debo notificarlo por pantalla?
+        :return: Traducción del token o "UNTRANSLATED_TOKEN "+token si no se ha encontrado
+        """
         try:
             return self.languages[language].get_option(option)
         except KeyError:
@@ -21,6 +32,10 @@ class Languages:
             return "UNTRANSLATED_TOKEN "+option
 
     def get_languages(self):
+        """
+        Obtiene la lista de lenguajes
+        :return: Lista de strings de lenguaje
+        """
         lista = list(self.languages.keys())
         returneo = []
         for x in lista:
@@ -32,6 +47,10 @@ class Languages:
 class Archivo:
 
     def __init__(self, entrada):
+        """
+        Carga un archivo de configuración
+        :param entrada: Archivo a cargar
+        """
         self.data = {}
         with open(entrada, "r") as f:
             arch = f.readlines()
@@ -49,6 +68,11 @@ class Archivo:
                     self.data[working] += "\n" + linea.split("\n")[0]
 
     def get_option(self, option):
+        """
+        Obtiene una opción del archivo
+        :param option: Opción a obtener
+        :return: Valor de la petición
+        """
         return self.data[option]
 
 

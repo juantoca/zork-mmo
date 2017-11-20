@@ -7,7 +7,7 @@ class Inventario(Entity):
     def __init__(self, identifier):
         super().__init__(identifier, "INVENTORY")
 
-    def coger(self, user, command, evento, get_evento=False):  # TODO Sistema de pesos
+    def coger(self, user, command, evento, get_evento=False):
         """
         Recoge un objeto de la sala
         """

@@ -1,3 +1,4 @@
+from copy import copy
 
 
 class Entity:
@@ -15,7 +16,7 @@ class Entity:
         """Para que el método antes expuesto funcione, necesitamos una referencia cruzada hacia la clase superior.
         Nos impedirá usar el método __del__ para guardar los datos implicitamente pero a cambio obtendremos una
         gran escalabilidad en el proyecto"""
-        self.atributes = {}
+        self.game = None
 
     def search_type(self, type_identifier):
         returneo = []
@@ -32,6 +33,7 @@ class Entity:
         """
         for x in self:
             x.evento(event_object)
+        self.event_handler(event_object)
 
     def get_entities(self):
         return [x for x in self.entities if not x.get_atribute("hidden")]
@@ -76,6 +78,21 @@ class Entity:
             returneo += x.query_entity(identifier)
         return returneo
 
+    def add_entity_def(self, entity, set_upper=True):
+        """
+        Añade una sub-entidad
+        :param entity: Entidad a añadir
+        :param set_upper: Debo guardar la clase que la contiene?
+        """
+        if set_upper:
+            entity.set_upper_object(self)
+        self.entities.append(entity)
+
+    def set_game(self, game):
+        self.game = game
+        for x in self:
+            x.set_game(game)
+
     def add_entity(self, entity, set_upper=True):
         """
         Añade una sub-entidad
@@ -85,6 +102,7 @@ class Entity:
         if set_upper:
             entity.set_upper_object(self)
         self.entities.append(entity)
+        entity.set_game(self.game)
 
     def remove_entity(self, entity):
         """
@@ -121,8 +139,8 @@ class Entity:
         :param token: Atributo a devolver
         :return: Valor del atributo
         """
-        if token in self.atributes:
-            return self.atributes[token]
+        if token in self.__dict__:
+            return self.__dict__[token]
         return False
 
     def set_atribute(self, token, value):
@@ -131,11 +149,28 @@ class Entity:
         :param token: Atributo a escribir
         :param value: Valor del atributo
         """
-        self.atributes[token] = value
+        self.__dict__[token] = value
 
     def remove_atribute(self, token):
-        if token in self.atributes:
-            del self.atributes[token]
+        if token in self.__dict__:
+            del self.__dict__[token]
+
+    def evento_descripcion(self, evento):
+        desc = self.get_atribute("description")
+        if evento.get_atribute("target") == self and desc:
+            evento.set_atribute("description", desc)
+
+    def event_handler(self, evento):
+        pass
+
+    def __getstate__(self):
+        returneo = copy(self.__dict__)
+        del returneo["game"]
+        return returneo
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+        self.game = None
 
     def __iter__(self):
         """
