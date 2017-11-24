@@ -71,7 +71,7 @@ class Sala(Entity):
         dic_tmp = self.usuarios
         self.usuarios = {}
         self.prepare_save()
-        set_sala_object(self.coordenadas, self)
+        set_sala_object(self.coordenadas, self, self.game.config)
         self.usuarios = dic_tmp
 
     def query_user(self, identifier):

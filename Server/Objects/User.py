@@ -26,7 +26,7 @@ class Personaje(Entity):
         self.sala = None
         self.game = None
         self.conn = None
-        set_user_object(self.nick, self)
+        set_user_object(self.nick, self, permanencia[1].config)
         self.sala, self.game, self.conn = permanencia
 
     def translate(self, token: str, warn: bool=True) -> str:

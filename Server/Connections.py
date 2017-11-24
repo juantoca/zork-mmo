@@ -1,5 +1,6 @@
 import Crypt_Server.Server
-from multiprocessing import Process, Value
+from threading import Thread
+from multiprocessing import Value
 from socket import timeout
 from Server.Game import Game
 from time import time
@@ -10,7 +11,6 @@ from Server.Config import Archivo
 
 def main(ip: str, port: int, exit_var: Value, log_func_handler: callable, game: Game,
          config: Archivo) -> None:
-    # TODO Modificar el sistema de hilos evitando procesos del sistema para evitar fork bombs provocadas por DDOS
     """
     Inicializa el servidor e inicializa las conexiones
     :param ip: Ip del servidor a levantar
@@ -37,7 +37,9 @@ def main(ip: str, port: int, exit_var: Value, log_func_handler: callable, game: 
             ip = conn.getpeername()[0]
             if ip not in dic:  # Si no ha mandado una petición recientemente la aceptamos
                 dic[ip] = time()
-                p = Process(target=log_func_handler, args=(conn, game, server, config))
+                # Usamos threads en vez de procesos ya que no necesitamos concurrecia pero si evitar
+                # saturación de procesos en el sistema
+                p = Thread(target=log_func_handler, args=(conn, game, server, config))
                 p.start()
             else:  # Si la ha enviado notificamos al servidor
                 dic[ip] = time()

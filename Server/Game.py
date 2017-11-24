@@ -14,7 +14,7 @@ from logging import info, warning, debug
 
 class Game:
 
-    def __init__(self, refresh_rate=60, save_rate=60*60):
+    def __init__(self, config, refresh_rate=60, save_rate=60*60):
         """
         Contructor del juego
         :param refresh_rate: Cada cuanto tengo que refrescar las entidades
@@ -29,6 +29,7 @@ class Game:
         self.last_save = time()
         self.refresh_rate = refresh_rate
         self.save_rate = save_rate
+        self.config = config
 
     def run(self):
         """
@@ -62,7 +63,7 @@ class Game:
         if coords in self.salas:
             return self.salas[coords]
         else:
-            sala = get_sala_object(coords)
+            sala = get_sala_object(coords, self.config)
             if sala is None:
                 info("Se ha intentado cargar una sala inexistente en las coordenadas: "+str(coords))
                 return

@@ -22,7 +22,6 @@ class Client:
             print(msg)
 
     def speaker(self, salir):
-        #self.conn.send("LOGIN proof 12345678")
         while not salir.value:
             self.conn.send(input(""))
 

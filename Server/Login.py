@@ -47,7 +47,7 @@ def handle_login(conn: socket, game: Game, server: Server, config: Archivo):
         dic = {"REGISTER": register, "LOGIN": login}
         command = conn.recv(timeout).split(" ")
         if len(command) == 3 and command[0] in dic:
-            success = dic[command[0]](conn, game, command)
+            success = dic[command[0]](conn, game, command, config)
             if not success:
                 conn.close()
         else:
@@ -100,9 +100,9 @@ def nick_validation(nick: str, nick_parser: callable=parse_string) -> bool:
     return True
 
 
-def register(conn: Connection, game: Game, command: (list, tuple), user_object=Personaje,
+def register(conn: Connection, game: Game, command: (list, tuple), config, user_object=Personaje,
              valid_nick_func: callable=nick_validation, valid_passwd_func: callable=pass_validation,
-             maximum_accounts_per_ip: int=3) -> bool:
+             ) -> bool:
     """
     Protocolo para registrar un usuario
     :param conn: Objeto representando la conexión
@@ -111,26 +111,25 @@ def register(conn: Connection, game: Game, command: (list, tuple), user_object=P
     :param user_object: Objeto que inicializar
     :param valid_nick_func: Funcion con la que verificar la validez del nick
     :param valid_passwd_func: Funcion con la que verificar la validez de la contraseña
-    :param maximum_accounts_per_ip: Número máximo de cuentas por ip
     :return: Succesful?
     """
     command = command[1:]  # [nick, contraseña]
     if not valid_nick_func(command[0]):
         conn.send("TOKEN INVALID_NICK")
         return False
-    if get_user_object(command[0]) is not None:
+    if get_user_object(command[0], config) is not None:
         conn.send("TOKEN NICK_TAKEN")
         return False
     if not valid_passwd_func(command[1]):
         conn.send("TOKEN INVALID_PASSWORD")
         return False
     ip = len(Usuario.select(Usuario.ip == conn.get_conn().getpeername()[0]))
-    if ip >= maximum_accounts_per_ip:
+    if ip >= int(config.get_option("maximum_accounts_per_ip")):
         conn.send("TOKEN TAKEN_IP")
         return False
     hasheo = SHA3_256.new(bytes(command[1], "utf-8")).hexdigest()
     usuario = user_object(command[0], initial_coords=(0, 0, 0))
-    objeto = guardar(usuario)
+    objeto = guardar(usuario, config)
     Usuario.create(nick=command[0], password_hash=hasheo, objeto=objeto,
                    last_connection=int(time()), ip=conn.get_conn().getpeername()[0])
     game.add_query(conn, usuario)
@@ -140,7 +139,8 @@ def register(conn: Connection, game: Game, command: (list, tuple), user_object=P
     return True
 
 
-def login(conn: Connection, game: Game, command: (list, tuple), nick_parser: callable=parse_string) -> bool:
+def login(conn: Connection, game: Game, command: (list, tuple), config:Archivo,
+          nick_parser: callable=parse_string) -> bool:
     """
     Función que permite a una conexión entrar al juego con una cuenta ya existente
     :param conn: Conexión con el cliente
@@ -153,7 +153,7 @@ def login(conn: Connection, game: Game, command: (list, tuple), nick_parser: cal
     if not nick_parser(command[0]):
         conn.send("TOKEN INVALID_NICK")
         return False
-    objeto = get_user_object(command[0])
+    objeto = get_user_object(command[0], config)
     if objeto is None:
         conn.send("TOKEN NICK_DOESNT_EXIST")
         return False
@@ -163,7 +163,7 @@ def login(conn: Connection, game: Game, command: (list, tuple), nick_parser: cal
     if password != registro.password_hash:
         conn.send("TOKEN INVALID_PASSWORD")
         return False
-    game.add_query(conn, get_user_object(command[0]))
+    game.add_query(conn, get_user_object(command[0], config))
     sleep(1)
     return True
 
@@ -186,19 +186,19 @@ def change_passwd(user, current: str, new: str, game, conn):
         registro.save()
 
 
-def get_user_object(nick: str) -> Personaje:  # TODO Encriptar objetos en la base de datos
+def get_user_object(nick: str, config:Archivo) -> Personaje:  # TODO Encriptar objetos en la base de datos
     """
     Carga un usuario de la base de datos
     :param nick: Nick a buscar
     :return: Objeto personaje o None si no existe el usuario especificado
     """
     try:
-        return cargar(Usuario.select().where(Usuario.nick == nick).get().objeto)
+        return cargar(Usuario.select().where(Usuario.nick == nick).get().objeto, config)
     except Usuario.DoesNotExist:
         return None
 
 
-def set_user_object(nick: str, objeto: Personaje) -> bool:
+def set_user_object(nick: str, objeto: Personaje, config:Archivo) -> bool:
     """
     Vuelca un usuario a la base de datos
     :param nick: Nick del usuario
@@ -207,7 +207,7 @@ def set_user_object(nick: str, objeto: Personaje) -> bool:
     """
     try:
         obj = Usuario.select().where(Usuario.nick == nick).get()
-        obj.objeto = guardar(objeto)
+        obj.objeto = guardar(objeto, config)
         obj.save()
         return True
     except Usuario.DoesNotExist:

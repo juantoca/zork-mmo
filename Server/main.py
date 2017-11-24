@@ -1,13 +1,12 @@
 import logging
 import multiprocessing
 from time import ctime, sleep
-
-import Server.Login
-from Server.Game import Game
-
 import Server.Connections as Connections
 
 from Server.Config import Archivo
+
+from Server.Object_pickler import generate_key
+
 
 def main():
     formater = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")  # Inicializamos el logger
@@ -22,10 +21,14 @@ def main():
 
     config = Archivo("./config.conf")  # Cargamos la configuración del servidor
 
+    generate_key(config)
     m = multiprocessing.Manager()
     salir = m.Value("b", False)  # Variable de salida del programa
 
-    game = Game()  # Juego propiamente dicho
+    import Server.Login
+    from Server.Game import Game
+
+    game = Game(config)  # Juego propiamente dicho
 
     p = multiprocessing.Process(target=Connections.main,
                                 args=(config.get_option("ip"), int(config.get_option("port")),

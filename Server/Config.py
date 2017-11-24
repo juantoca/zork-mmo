@@ -75,6 +75,14 @@ class Archivo:
         """
         return self.data[option]
 
+    def set_option(self, option, value):
+        """
+        Escribe en una opción del archivo(no lo guarda en disco)
+        :param option: Opción a modificar
+        :param value: Valor a escribir
+        """
+        self.data[option] = value
+
 
 if __name__ == "__main__":
     idiomas = Languages()
