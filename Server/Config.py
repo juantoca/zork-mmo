@@ -67,7 +67,7 @@ class Archivo:
                 else:
                     self.data[working] += "\n" + linea.split("\n")[0]
 
-    def get_option(self, option):
+    def get_option(self, option) -> str:
         """
         Obtiene una opción del archivo
         :param option: Opción a obtener

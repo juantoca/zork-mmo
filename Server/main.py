@@ -45,7 +45,8 @@ def main():
     q.start()  # Iniciar el juego
 
     r = multiprocessing.Process(target=start_listening, args=(config, ))
-    r.start()
+    if "true" == config.get_option("telegram_integration").lower():
+        r.start()
 
     p.join()
     q.join()
@@ -63,7 +64,8 @@ def loop(salir, game, config):
         game.send_all("UNEXPECTED_INTERNAL_ERROR")
         game.descargar_todo()  # Volcamos a disco todos los datos
         logging.exception(ctime())  # Guardamos la excepción
-        notify_all("ERROR INTERNO INESPERADO\n"+format_exc(), config)  # Notificamos via telegram el error
+        if "true" == config.get_option("telegram_integration").lower():
+            notify_all("ERROR INTERNO INESPERADO\n"+format_exc(), config)  # Notificamos via telegram el error
 
 
 if __name__ == "__main__":
