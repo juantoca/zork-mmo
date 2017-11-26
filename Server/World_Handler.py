@@ -38,7 +38,7 @@ def get_sala_object(coords, config):
         return None
 
 
-def set_sala_object(coords, objeto, config):  # TODO Encriptar objetos en la base de datos
+def set_sala_object(coords, objeto, config):
     """
     Sobreescribe una sala en la base de datos
     :param coords: Coordenadas de la sala

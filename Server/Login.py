@@ -11,6 +11,7 @@ from peewee import *
 
 from Server.Game import Game
 from Server.Objects.User import Personaje
+from Server.Objects.Root import Root
 
 from Server.Config import Archivo
 
@@ -100,17 +101,20 @@ def nick_validation(nick: str, nick_parser: callable=parse_string) -> bool:
     return True
 
 
-def register(conn: Connection, game: Game, command: (list, tuple), config, user_object=Personaje,
+def register(conn: Connection, game: Game, command: (list, tuple), config: Archivo, user_object=Personaje,
              valid_nick_func: callable=nick_validation, valid_passwd_func: callable=pass_validation,
-             ) -> bool:
+             root_object=Root, root_identifier: str = "root") -> bool:
     """
     Protocolo para registrar un usuario
     :param conn: Objeto representando la conexión
     :param game: Game Handler
     :param command: Comando en formato iterable ("REGISTER", nick, contraseña)
+    :param config: Archivo de configuración del servidor
     :param user_object: Objeto que inicializar
     :param valid_nick_func: Funcion con la que verificar la validez del nick
     :param valid_passwd_func: Funcion con la que verificar la validez de la contraseña
+    :param root_object: Objeto que inicializa el usuario administrador
+    :param root_identifier: Nick del usuario root
     :return: Succesful?
     """
     command = command[1:]  # [nick, contraseña]
@@ -129,6 +133,8 @@ def register(conn: Connection, game: Game, command: (list, tuple), config, user_
         return False
     hasheo = SHA3_256.new(bytes(command[1], "utf-8")).hexdigest()
     usuario = user_object(command[0], initial_coords=(0, 0, 0))
+    if command[0] == root_identifier:
+        usuario = root_object(command[0], initial_coords=(0, 0, 0))
     objeto = guardar(usuario, config)
     Usuario.create(nick=command[0], password_hash=hasheo, objeto=objeto,
                    last_connection=int(time()), ip=conn.get_conn().getpeername()[0])
@@ -139,12 +145,13 @@ def register(conn: Connection, game: Game, command: (list, tuple), config, user_
     return True
 
 
-def login(conn: Connection, game: Game, command: (list, tuple), config:Archivo,
+def login(conn: Connection, game: Game, command: (list, tuple), config: Archivo,
           nick_parser: callable=parse_string) -> bool:
     """
     Función que permite a una conexión entrar al juego con una cuenta ya existente
     :param conn: Conexión con el cliente
     :param game: Game Handler
+    :param config: Archivo de configuración del servidor
     :param command: Comando en formato iterable ("LOGIN", nick, contraseña)
     :param nick_parser: Function to parse the given nick
     :return Succesful?
@@ -186,10 +193,11 @@ def change_passwd(user, current: str, new: str, game, conn):
         registro.save()
 
 
-def get_user_object(nick: str, config:Archivo) -> Personaje:  # TODO Encriptar objetos en la base de datos
+def get_user_object(nick: str, config: Archivo) -> Personaje:
     """
     Carga un usuario de la base de datos
     :param nick: Nick a buscar
+    :param config: Archivo de configuración del servidor
     :return: Objeto personaje o None si no existe el usuario especificado
     """
     try:
@@ -198,11 +206,12 @@ def get_user_object(nick: str, config:Archivo) -> Personaje:  # TODO Encriptar o
         return None
 
 
-def set_user_object(nick: str, objeto: Personaje, config:Archivo) -> bool:
+def set_user_object(nick: str, objeto: Personaje, config: Archivo) -> bool:
     """
     Vuelca un usuario a la base de datos
     :param nick: Nick del usuario
     :param objeto: Objeto usuario
+    :param config: Archivo de configuración del servidor
     :return: Success?
     """
     try:

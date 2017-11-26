@@ -4,11 +4,6 @@ from Crypto.Random import get_random_bytes
 from time import sleep
 from subprocess import call
 
-"""
-Es probable que este archivo se pudiera incluir en otra parte pero a lo mejor en el futuro quiero cambiar
-el sistema de guardado(El pickle ocupa bastante espacio)
-"""
-
 
 def guardar(objeto, config):
     string = bytes(dumps(objeto))
@@ -30,12 +25,12 @@ def generate_key(config):
     try:
         open("Salas.db", "r")
         open("Users.db", "r")
-    except:
+    except FileNotFoundError:
         key = get_random_bytes(int(256/8))
-        print("No se ha encontrado las bases de datos. Hemos generado una clave"
+        print("No se ha encontrado las bases de datos. Hemos generado una clave "
               "criptográfica para usarla. Almacenela ya que "
               "para volver a levantar el "
-              "servidor se requiere para desencriptar la base de datos. La clave es la"
+              "servidor se requiere para desencriptar la base de datos. La clave es la "
               "siguiente:\n\n"+key.hex()+"\n\nEste mensaje se borrara en 10 segundos")
         sleep(10)
     else:
@@ -43,4 +38,3 @@ def generate_key(config):
 
     config.set_option("cryptographic_key_db", key)
     call("reset")  # Borramos los datos sensibles de la terminal
-

@@ -1,6 +1,6 @@
 import multiprocessing
 from queue import Empty
-from time import time, sleep
+from time import time
 from Server.Config import Languages
 
 from Server.Objects.User import Personaje
@@ -124,7 +124,7 @@ class Game:
         """
         self.queue.put((conn, objeto))
 
-    def add_user(self, conn, objeto: Personaje):  # TODO Usuario Root
+    def add_user(self, conn, objeto: Personaje):
         """
         Función que hace efectiva la petición de añadir el personaje
         :param conn: Conexión con el cliente

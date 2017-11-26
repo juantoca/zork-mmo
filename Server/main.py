@@ -2,7 +2,8 @@ import logging
 import multiprocessing
 from time import ctime, sleep
 import Server.Connections as Connections
-
+from traceback import format_exc
+from Server.Telegram_bot import notify_all, start_listening
 from Server.Config import Archivo
 
 from Server.Object_pickler import generate_key
@@ -26,6 +27,11 @@ def main():
     salir = m.Value("b", False)  # Variable de salida del programa
 
     import Server.Login
+
+    if not Server.Login.get_user_object("root", config):
+        logging.warning("No se ha encontrado el usuario root. "
+                        "Recuerda conectarte con un cliente e inicializarlo.")
+
     from Server.Game import Game
 
     game = Game(config)  # Juego propiamente dicho
@@ -35,24 +41,29 @@ def main():
                                       salir, Server.Login.handle_login, game, config))
     p.start()  # Aceptar peticiones de logeo o registro
 
-    q = multiprocessing.Process(target=loop, args=(salir, game))
-    q.start()
+    q = multiprocessing.Process(target=loop, args=(salir, game, config))
+    q.start()  # Iniciar el juego
+
+    r = multiprocessing.Process(target=start_listening, args=(config, ))
+    r.start()
 
     p.join()
     q.join()
 
+    r.terminate()
 
-def loop(salir, game):
+
+def loop(salir, game, config):
     try:
         while not salir.value:
             game.run()
             sleep(0.01)  # Bajamos el uso de la cpu a lo bruto
-    except Exception:
+    except Exception as e:
         salir.value = True
         game.send_all("UNEXPECTED_INTERNAL_ERROR")
         game.descargar_todo()  # Volcamos a disco todos los datos
-        logging.exception(ctime())  # Guardamos las excepción
-        # TODO mandar notificación al administrador(correo, telegram, etc..)
+        logging.exception(ctime())  # Guardamos la excepción
+        notify_all("ERROR INTERNO INESPERADO\n"+format_exc(), config)  # Notificamos via telegram el error
 
 
 if __name__ == "__main__":
